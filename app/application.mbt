@@ -23,7 +23,9 @@ pub impl @application.Application for App with fn button(
   _self : App,
   _button : @input.Button,
   _pressed : Bool,
-) -> Unit {}
+) -> Unit {
+
+}
 
 ///|
 pub impl @application.Application for App with fn button_event(
@@ -45,9 +47,7 @@ pub impl @application.Application for App with fn render(
 
 ///|
 /// This utility plays no sound.
-pub impl @application.Application for App with fn audio_output(
-  _self : App,
-) -> @application.AudioOutput? {
+pub impl @application.Application for App with fn audio_output(_self : App) -> @application.AudioOutput? {
   None
 }
 
