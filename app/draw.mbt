@@ -72,13 +72,27 @@ fn draw_digit(
   let f = digit != 1 && digit != 2 && digit != 3 && digit != 7
   let g = digit != 0 && digit != 1 && digit != 7
 
-  if a { canvas.fill_rect(x=x + 4, y=y, w=18, h=4, color~) }
-  if b { canvas.fill_rect(x=x + 22, y=y + 4, w=4, h=18, color~) }
-  if c { canvas.fill_rect(x=x + 22, y=y + 25, w=4, h=18, color~) }
-  if d { canvas.fill_rect(x=x + 4, y=y + 43, w=18, h=4, color~) }
-  if e { canvas.fill_rect(x=x, y=y + 25, w=4, h=18, color~) }
-  if f { canvas.fill_rect(x=x, y=y + 4, w=4, h=18, color~) }
-  if g { canvas.fill_rect(x=x + 4, y=y + 21, w=18, h=4, color~) }
+  if a {
+    canvas.fill_rect(x=x + 4, y~, w=18, h=4, color~)
+  }
+  if b {
+    canvas.fill_rect(x=x + 22, y=y + 4, w=4, h=18, color~)
+  }
+  if c {
+    canvas.fill_rect(x=x + 22, y=y + 25, w=4, h=18, color~)
+  }
+  if d {
+    canvas.fill_rect(x=x + 4, y=y + 43, w=18, h=4, color~)
+  }
+  if e {
+    canvas.fill_rect(x~, y=y + 25, w=4, h=18, color~)
+  }
+  if f {
+    canvas.fill_rect(x~, y=y + 4, w=4, h=18, color~)
+  }
+  if g {
+    canvas.fill_rect(x=x + 4, y=y + 21, w=18, h=4, color~)
+  }
 }
 
 ///|
@@ -101,10 +115,7 @@ fn draw_big_dbfs(
 }
 
 ///|
-fn draw_header(
-  canvas : @graphics.Canvas,
-  battery_percent : Int?,
-) -> Unit {
+fn draw_header(canvas : @graphics.Canvas, battery_percent : Int?) -> Unit {
   canvas.text(text="MIC CHECK", x=14, y=12, color=color_text())
   let battery = match battery_percent {
     Some(value) => "BAT \{value.max(0).min(100)}%"
@@ -112,13 +123,7 @@ fn draw_header(
   }
   let bx = canvas.width() - @graphics.text_width(text=battery) - 14
   canvas.text(text=battery, x=bx, y=12, color=color_muted())
-  canvas.line(
-    x0=14,
-    y0=24,
-    x1=canvas.width() - 14,
-    y1=24,
-    color=color_panel(),
-  )
+  canvas.line(x0=14, y0=24, x1=canvas.width() - 14, y1=24, color=color_panel())
 }
 
 ///|
@@ -127,7 +132,12 @@ fn capture_message(app : App) -> String {
     Unavailable => "NO MIC"
     Idle => "PRESS OK"
     Requesting => "ALLOW MIC"
-    Recording => if app.frozen { "FROZEN" } else { signal_label(app.display_dbfs()) }
+    Recording =>
+      if app.frozen {
+        "FROZEN"
+      } else {
+        signal_label(app.display_dbfs())
+      }
     Denied => "MIC DENIED"
     Failed => "MIC FAILED"
   }
@@ -144,13 +154,7 @@ fn App::draw_meter(self : App) -> Unit {
   self.canvas.fill_rect(x~, y~, w=width, h=height, color=color_panel())
 
   let fill_width = (db_to_meter_x(dbfs, x, width) - x).max(0)
-  self.canvas.fill_rect(
-    x~,
-    y~,
-    w=fill_width,
-    h=height,
-    color=level_color(dbfs),
-  )
+  self.canvas.fill_rect(x~, y~, w=fill_width, h=height, color=level_color(dbfs))
 
   let low_good = db_to_meter_x(-30, x, width)
   let good_hot = db_to_meter_x(-6, x, width)
@@ -178,41 +182,25 @@ fn App::draw_meter(self : App) -> Unit {
     color=color_peak(),
   )
 
-  self.canvas.text(text="-60", x=x, y=y + 31, color=color_muted())
-  self.canvas.text(
-    text="-30",
-    x=low_good - 7,
-    y=y + 31,
-    color=color_muted(),
-  )
-  self.canvas.text(
-    text="-6",
-    x=good_hot - 4,
-    y=y + 31,
-    color=color_muted(),
-  )
-  self.canvas.text(
-    text="0",
-    x=x + width - 4,
-    y=y + 31,
-    color=color_muted(),
-  )
+  self.canvas.text(text="-60", x~, y=y + 31, color=color_muted())
+  self.canvas.text(text="-30", x=low_good - 7, y=y + 31, color=color_muted())
+  self.canvas.text(text="-6", x=good_hot - 4, y=y + 31, color=color_muted())
+  self.canvas.text(text="0", x=x + width - 4, y=y + 31, color=color_muted())
 }
 
 ///|
 fn App::draw_status_panel(self : App) -> Unit {
   let y = 166
   let width = self.canvas.width() - 28
-  self.canvas.fill_rect(
-    x=14,
-    y~,
-    w=width,
-    h=70,
-    color=color_panel(),
-  )
+  self.canvas.fill_rect(x=14, y~, w=width, h=70, color=color_panel())
 
   let message = capture_message(self)
-  self.canvas.text(text=message, x=24, y=y + 12, color=level_color(self.display_dbfs()))
+  self.canvas.text(
+    text=message,
+    x=24,
+    y=y + 12,
+    color=level_color(self.display_dbfs()),
+  )
   self.canvas.text(
     text="PEAK \{self.peak_hold_dbfs} DBFS",
     x=24,
@@ -229,14 +217,19 @@ fn App::draw_status_panel(self : App) -> Unit {
     text="DROP \{self.visible_dropped_samples()}",
     x=24,
     y=y + 55,
-    color=if self.visible_dropped_samples() > 0 { color_hot() } else { color_muted() },
+    color=if self.visible_dropped_samples() > 0 {
+      color_hot()
+    } else {
+      color_muted()
+    },
   )
 }
 
 ///|
 fn App::draw_controls(self : App) -> Unit {
   let y = self.canvas.height() - 62
-  let action = if self.wants_capture || self.capture_status == Recording ||
+  let action = if self.wants_capture ||
+    self.capture_status == Recording ||
     self.capture_status == Requesting {
     "OK STOP"
   } else {
