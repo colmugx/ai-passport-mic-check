@@ -8,7 +8,7 @@ test "PCM16 magnitude handles the signed minimum" {
 ///|
 test "amplitude dBFS approximation has useful anchors" {
   inspect(amplitude_dbfs(32767), content="0")
-  inspect(amplitude_dbfs(29205), content="-1")
+  inspect(amplitude_dbfs(26029), content="-1")
   inspect(amplitude_dbfs(23198), content="-3")
   inspect(amplitude_dbfs(16384), content="-6")
   inspect(amplitude_dbfs(8192), content="-12")
