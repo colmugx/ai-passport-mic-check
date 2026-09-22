@@ -167,7 +167,8 @@ fn App::start_capture(self : App) -> Unit {
 
 ///|
 fn App::stop_capture(self : App) -> Unit {
-  if self.wants_capture || self.capture_status == Recording ||
+  if self.wants_capture ||
+    self.capture_status == Recording ||
     self.capture_status == Requesting {
     @audio.capture_stop()
   }
@@ -178,7 +179,8 @@ fn App::stop_capture(self : App) -> Unit {
 
 ///|
 fn App::toggle_capture(self : App) -> Unit {
-  if self.wants_capture || self.capture_status == Recording ||
+  if self.wants_capture ||
+    self.capture_status == Recording ||
     self.capture_status == Requesting {
     self.stop_capture()
   } else {
@@ -225,19 +227,13 @@ fn App::integrate_level(
     self.level_cdb = instant_cdb
   } else if delta_us > 0L {
     let fall_rate = response_fall_cdb_per_second(self.response)
-    let fall = (
-      delta_us * fall_rate.to_int64() / 1_000_000L
-    ).to_int()
+    let fall = (delta_us * fall_rate.to_int64() / 1_000_000L).to_int()
     self.level_cdb = (self.level_cdb - fall).max(instant_cdb).max(-6000)
   }
 }
 
 ///|
-fn App::poll_capture(
-  self : App,
-  delta_us : Int64,
-  update_meter : Bool,
-) -> Unit {
+fn App::poll_capture(self : App, delta_us : Int64, update_meter : Bool) -> Unit {
   let mut overall_peak = 0
   let mut sum_squares = 0L
   let mut sample_count = 0
@@ -276,9 +272,7 @@ fn App::poll_capture(
 /// Advances microphone state from the Host's monotonic frame clock.
 pub fn App::advance(self : App, now_us : Int64) -> Unit {
   let delta_us = match self.last_now_us {
-    Some(previous) => {
-      if now_us > previous { now_us - previous } else { 0L }
-    }
+    Some(previous) => if now_us > previous { now_us - previous } else { 0L }
     None => 0L
   }
   self.last_now_us = Some(now_us)
@@ -293,13 +287,12 @@ pub fn App::advance(self : App, now_us : Int64) -> Unit {
       self.poll_capture(delta_us, !self.frozen)
     }
     Requesting => self.wants_capture = true
-    Idle => {
+    Idle =>
       if self.wants_capture {
         // A Host may transition back to Idle after capture has been stopped
         // externally. Reflect that state instead of pretending capture runs.
         self.wants_capture = false
       }
-    }
     Unavailable => self.wants_capture = false
     Denied => self.wants_capture = false
     Failed => self.wants_capture = false
@@ -324,10 +317,7 @@ pub fn App::handle_button_event(
       if button == Ok && self.capture_status == Recording {
         self.frozen = !self.frozen
       }
-    LongPress =>
-      if button == Ok {
-        self.reset_all()
-      }
+    LongPress => if button == Ok { self.reset_all() }
     Press => ()
   }
 }
